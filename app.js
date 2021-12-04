@@ -14,7 +14,6 @@ app.get('/', (req, res) => {
 
 app.post('/connect', (req, res) => {
   let body = req.body
-  // res.json(req.body)
   if (body.gameID) {
     if (!games[body.gameID]) {
       res.send(`Game ${body.gameID} does not exist.`)
@@ -22,7 +21,6 @@ app.post('/connect', (req, res) => {
     }
 
     let connection = games[body.gameID].connect(body.playerID)
-    // res.send('no id')
     console.log(connection)
     res.json(connection)
     return

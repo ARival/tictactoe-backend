@@ -60,6 +60,8 @@ export default class TicTacToeGame {
   }
 
   connect(playerOID) {
+    // TODO: Protect against redundant reconnects
+    // TODO: Protect against 3+ players connecting
     if (this._playerXID === playerOID) return new Error('Same Player Trying to connect to own game.')
     this._playerOID = playerOID
     return this.startGame()
@@ -123,7 +125,6 @@ export default class TicTacToeGame {
     const win = this.checkWin(moves)
     this._state = win ? this._state === TTTPhase.PLAYER_X ? TTTPhase.WINNER_PLAYER_X : TTTPhase.WINNER_PLAYER_O : 
             this._state === TTTPhase.PLAYER_X ? TTTPhase.PLAYER_O : TTTPhase.PLAYER_X
-
 
     return {
       boxes,
