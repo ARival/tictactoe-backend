@@ -80,7 +80,7 @@ export default class TicTacToeGame {
     this._state.movesPX.clear()
     this._state.movesPO.clear()
 
-    this._state.phase = (Math.random > 0.5) ? TTTPhase.PLAYER_X : TTTPhase.PLAYER_O
+    this._state.phase = (Math.random() > 0.5) ? TTTPhase.PLAYER_X : TTTPhase.PLAYER_O
     this._state.boxes = {
       ...defaultBox
     }

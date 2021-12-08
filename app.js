@@ -59,6 +59,26 @@ app.post('/api/cancel', (req, res) => {
   res.send('No gameID provided.')
 })
 
+app.post('/api/restart', (req, res) => {
+  let state = req?.body?.state
+  if (state && state.gameID) { 
+    let game = games[state.gameID]
+    if (!game) {
+      res.send(`Game ${state.gameID} does not exist.`)
+      return
+    }
+
+    let gameState = game.getGameState()
+    if (state.playerXID !== gameState.state.playerXID && state.playerOID !== gameState.state.playerOID) {
+        res.send(`Player ${body.playerID} does not have access to game ${body.gameID}.`)
+        return
+    }
+    res.json(game.startGame())
+    return
+  }
+  res.send('No gameID provided.')
+})
+
 app.post('/api/getGameState', (req, res) => {
   let body = req.body
   if (body.gameID) {
