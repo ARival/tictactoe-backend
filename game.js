@@ -10,7 +10,8 @@ const TTTPhase = {
   RESTARTING: 6,
   WAITING_FOR_PLAYER: 7,
   DRAW: 8,
-  WAITING_FOR_CONNECTION: 9
+  WAITING_FOR_CONNECTION: 9,
+  GAME_NOT_FOUND: 10
 }
 
 const defaultBox = {
@@ -39,54 +40,60 @@ const TTTWinningSets = [
 ]
 
 export default class TicTacToeGame {
-  _playerXID = -1
-  _playerOID = -1
+  _playerXJWT = -1
+  _playerOJWT = -1
 
-  _movesPX = new Set()
-  _movesPO = new Set()
-  
-  _gameID = -1
+  _state = {
+    gameID: -1,
+    phase: TTTPhase.WAITING_FOR_CONNECTION,
+    playerXID: -1,
+    playerXIcon: 0,
+    playerOID: -1,
+    playerOIcon: 1,
+    movesPX: new Set(),
+    movesPO: new Set(),
+    boxes: {
+      ...defaultBox
+    }
+  }
 
-  _state = TTTPhase.WAITING_FOR_CONNECTION
-
-  constructor(playerXID) {
-    this._playerXID = playerXID
-
-    this._gameID = uuidv4()
+  constructor(playerXID, playerXIcon) {
+    this._state.playerXID = playerXID
+    this._state.playerXIcon = playerXIcon
+    this._state.gameID = uuidv4()
   }
 
   getGameID () {
-    return this._gameID
+    return this._state.gameID
   }
 
-  connect(playerOID) {
-    // TODO: Protect against redundant reconnects
-    // TODO: Protect against 3+ players connecting
-    if (this._playerXID === playerOID) return new Error('Same Player Trying to connect to own game.')
-    this._playerOID = playerOID
+  connect(playerOID, playerOIcon) {
+    if (this._state.phase !== TTTPhase.WAITING_FOR_CONNECTION) return new Error("Game not waiting for connection")
+    if (this._state.playerOID !== -1) return new Error("Player O already connected")
+    if (this._state.playerXID === playerOID) return new Error('Same Player Trying to connect to own game.')
+    this._state.playerOID = playerOID
+    this._state.playerOIcon = playerOIcon
     return this.startGame()
   }
 
   startGame() {
-    this._movesPX.clear()
-    this._movesPO.clear()
+    this._state.movesPX.clear()
+    this._state.movesPO.clear()
 
-    this._state = Math.floor(Math.random + 0.5) === 0 ? TTTPhase.PLAYER_X : TTTPhase.PLAYER_O
+    this._state.phase = (Math.random > 0.5) ? TTTPhase.PLAYER_X : TTTPhase.PLAYER_O
+    this._state.boxes = {
+      ...defaultBox
+    }
+
 
     return {
-      boxes: {
-        ...defaultBox
-      },
-      state: this._state,
-      id: this._gameID
+      state: this._state, 
     }
   }
   
   getGameState () {
     return {
       state: this._state,
-      playerXID: this._playerXID,
-      playerOID: this._playerOID
     }
   }
 
@@ -95,22 +102,22 @@ export default class TicTacToeGame {
   }
 
   handlePlayerMove(playerID, index) {
-    if (this._state !== TTTPhase.PLAYER_X && this._state !== TTTPhase.PLAYER_O) return new Error("Game not started!")
-    if (playerID !== this._playerXID && playerID !== this._playerOID) return new Error("Invalid Player ID for move")
-    if ((playerID === this._playerXID && this._state !== TTTPhase.PLAYER_X) || 
-        (playerID === this._playerOID && this._state !== TTTPhase.PLAYER_O)) return "move out of turn"
+    if (this._state.phase !== TTTPhase.PLAYER_X && this._state.phase !== TTTPhase.PLAYER_O) return new Error("Game not started!")
+    if (playerID !== this._state.playerXID && playerID !== this._state.playerOID) return new Error("Invalid Player ID for move")
+    if ((playerID === this._state.playerXID && this._state.phase !== TTTPhase.PLAYER_X) || 
+        (playerID === this._state.playerOID && this._state.phase !== TTTPhase.PLAYER_O)) return "move out of turn"
 
-    if (this._movesPX.has(index) || this._movesPO.has(index)) return new Error('move already exists!')
+    if (this._state.movesPX.has(index) || this._state.movesPO.has(index)) return new Error('move already exists!')
 
-    const moves = playerID === this._playerXID ? this._movesPX : this._movesPO
+    const moves = playerID === this._state.playerXID ? this._state.movesPX : this._state.movesPO
     moves.add(index)
 
     const MovesPXObj = {}
-    for (const key of this._movesPX) {
+    for (const key of this._state.movesPX) {
       MovesPXObj[key] = 1
     }
     const MovesPYObj = {}
-    for (const key of this._movesPO) {
+    for (const key of this._state.movesPO) {
       MovesPYObj[key] = 2
     }
 
@@ -123,11 +130,13 @@ export default class TicTacToeGame {
     console.log(boxes)
     
     const win = this.checkWin(moves)
-    this._state = win ? this._state === TTTPhase.PLAYER_X ? TTTPhase.WINNER_PLAYER_X : TTTPhase.WINNER_PLAYER_O : 
-            this._state === TTTPhase.PLAYER_X ? TTTPhase.PLAYER_O : TTTPhase.PLAYER_X
+    this._state.phase = win ? this._state.phase === TTTPhase.PLAYER_X ? TTTPhase.WINNER_PLAYER_X : TTTPhase.WINNER_PLAYER_O : 
+            this._state.phase === TTTPhase.PLAYER_X ? TTTPhase.PLAYER_O : TTTPhase.PLAYER_X
+    
+    if (Object.values(boxes).indexOf(0) === -1 && !win) this._state.phase = TTTPhase.DRAW
+    this._state.boxes = boxes
 
     return {
-      boxes,
       state: this._state
     }
   }
