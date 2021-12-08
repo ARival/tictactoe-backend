@@ -2,8 +2,12 @@
 A generic Node.js Multiplayer Backend for TicTacToe 
 
 ## Features
-Not many. A full game is able to be played from start to finish, and that's about it.
+- Allows a full game to be played.
+- Allows for a game to be restarted
+- Allows for a game to be canceled
+- (Meh) verification of users for game admin permissions
+- Names and Icons for players!
 
 ## TODO
-* Enhance the state to allow configurable player names and icons.
-* Add REAL security
+- Add persistence via database
+- Add JWT verification
