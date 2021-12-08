@@ -1,5 +1,5 @@
 # tictactoe-backend
-A Multiplayer Backend for a TicTacToe coded in NODE
+A generic Node.js Multiplayer Backend for TicTacToe 
 
 ## Features
 Not many. A full game is able to be played from start to finish, and that's about it.
