@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "apps.js",
-  "scripts": {
-  },
+  "scripts": {},
   "keywords": [],
   "author": "A_Rival",
   "license": "ISC",
@@ -13,6 +12,7 @@
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "jsonwebtoken": "^8.5.1",
+    "pm2": "^5.1.2",
     "uuid": "^8.3.2"
   },
   "type": "module"
