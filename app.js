@@ -4,7 +4,7 @@ import TicTacToeGame from './game.js'
 import dotenv from 'dotenv'
 
 const app = express()
-const port = 3001
+const port = process.env.PORT || 3000
 
 dotenv.config()
 
@@ -27,6 +27,7 @@ app.post('/api/connect', (req, res) => {
 
     let connection = games[body.gameID].connect(body.playerID, body.icon)
     console.log(connection)
+    console.log('connection successful!')
     res.json(connection)
     return
   }
